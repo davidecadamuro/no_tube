@@ -30,20 +30,22 @@ object Main extends App with RandomDate {
 
   //  Random.
 
-  val StartStop(start, stop) = get10MinsInterval()
+  val StartStop(start, stop) = getInterval(10)
 
-  val search = youTube.search().list("id")
+  val search = youTube.search().list("id,snippet")
     .setKey(credentials)
     .setType("video")
     .setMaxResults(NUMBER_OF_VIDEOS_RETURNED.toLong)
     .setPublishedAfter(DateTime.parseRfc3339(start.toLocalDateTime.toString))
     .setPublishedBefore(DateTime.parseRfc3339(stop.toLocalDateTime.toString))
+    .setOrder("viewCount")
 
   val result: SearchListResponse = search.execute()
 
-  val items: List[SearchResult] = result.getItems.toList
+  val items: List[SearchResult] = result.getItems.toList.reverse
 
-  items.map{_.getId.getVideoId}.foreach(id => println(s"https://www.youtube.com/watch?v=$id"))
+  items.map{item => (item.getId.getVideoId, item.getSnippet.getTitle)}.foreach{case (id,title) => println(s"https://www.youtube.com/watch?v=$id\t$title")}
+
 
 }
 
@@ -53,19 +55,18 @@ trait RandomDate {
   val end: Timestamp
   private lazy val diff = end.getTime - offset.getTime + 1
 
-  val tenMinutes = 1000L * 60 * 10
+  val aMinute = 1000L * 60
 
   def getRandomDate() = {
     new Timestamp(offset.getTime + (Random.nextDouble() * diff).toLong)
   }
 
-  def get10MinsInterval() = {
+  def getInterval(minutes: Long) = {
     val start = getRandomDate()
-    val end = new Timestamp(start.getTime + tenMinutes)
+    val end = new Timestamp(start.getTime + aMinute * minutes)
 
     StartStop(start, end)
   }
-
 
     case class StartStop(start: Timestamp, stop: Timestamp)
 

@@ -20,7 +20,7 @@ class RandomDateSpec extends FlatSpec with Matchers with RandomDate {
   }
 
   it should "create a ten minutes interval" in {
-    val interval = get10MinsInterval()
+    val interval = getInterval(10)
 
     interval.stop.getTime - interval.start.getTime shouldBe 1000 * 60 * 10
   }
