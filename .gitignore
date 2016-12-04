@@ -1,0 +1,4 @@
+.idea
+src/main/resources/api_key.txt
+target/*
+project/target/*
